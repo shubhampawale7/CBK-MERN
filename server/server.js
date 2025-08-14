@@ -14,24 +14,23 @@ connectDB();
 
 const app = express();
 
-// --- ✅ CORS Configuration ---
+// --- ✅ CORS Configuration for Vercel + Local Dev ---
 const allowedOrigins = [
   "http://localhost:5173", // Vite dev
   "http://localhost:3000", // CRA dev
-  process.env.VERCEL_FRONTEND_URL, // Production frontend URL
+  process.env.VERCEL_FRONTEND_URL, // Your deployed Vercel frontend
 ];
 
-// Enable CORS for allowed origins + Vercel preview deployments
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // Allow requests with no origin
+      if (!origin) return callback(null, true); // Allow requests without origin (e.g., mobile apps, curl)
       if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));
     },
-    credentials: true, // Important for cookies/auth
+    credentials: true, // ✅ Allow cookies / withCredentials requests
   })
 );
 
@@ -44,7 +43,11 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/users", userRoutes);
 
-// --- Test route ---
+// --- Test route for backend health ---
+app.get("/", (req, res) => {
+  res.send("✅ Backend is running and CORS is configured correctly.");
+});
+
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from the server!" });
 });
