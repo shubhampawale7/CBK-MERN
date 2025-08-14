@@ -2,6 +2,7 @@
 import mongoose from "mongoose";
 import Application from "../models/Application.js";
 
+// Get all applications
 export const getApplications = async (req, res) => {
   try {
     const applications = await Application.find({});
@@ -13,13 +14,26 @@ export const getApplications = async (req, res) => {
   }
 };
 
-export const getApplicationByName = async (req, res) => {
+// Get application by ID or Name (slug)
+export const getApplicationByIdOrName = async (req, res) => {
   try {
-    const industryName = req.params.name.replace(/-/g, " ");
-    const application = await Application.findOne({
-      industry: { $regex: new RegExp(industryName, "i") },
-    });
+    const param = req.params.param;
+    let application;
 
+    // If param is a valid MongoDB ObjectId, try finding by ID
+    if (mongoose.Types.ObjectId.isValid(param)) {
+      application = await Application.findById(param);
+    }
+
+    // If not found by ID, try finding by name (case-insensitive, slug-friendly)
+    if (!application) {
+      const industryName = param.replace(/-/g, " ");
+      application = await Application.findOne({
+        industry: { $regex: new RegExp(industryName, "i") },
+      });
+    }
+
+    // If still not found
     if (!application) {
       return res.status(404).json({ message: "Application not found" });
     }
@@ -27,12 +41,13 @@ export const getApplicationByName = async (req, res) => {
     res.status(200).json(application);
   } catch (error) {
     res.status(500).json({
-      message: "Error fetching application details",
+      message: "Error fetching application",
       error: error.message,
     });
   }
 };
 
+// Create a new application
 export const createApplication = async (req, res) => {
   const { industry, applicationsList } = req.body;
 
@@ -50,6 +65,7 @@ export const createApplication = async (req, res) => {
   }
 };
 
+// Update application by ID
 export const updateApplication = async (req, res) => {
   const { industry, applicationsList } = req.body;
   const { id } = req.params;
@@ -74,6 +90,7 @@ export const updateApplication = async (req, res) => {
   }
 };
 
+// Delete application by ID
 export const deleteApplication = async (req, res) => {
   const { id } = req.params;
 
@@ -90,20 +107,5 @@ export const deleteApplication = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error deleting application", error: error.message });
-  }
-};
-export const getApplicationById = async (req, res) => {
-  try {
-    const application = await Application.findById(req.params.id);
-
-    if (application) {
-      res.json(application);
-    } else {
-      res.status(404).json({ message: "Application not found" });
-    }
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching application", error: error.message });
   }
 };

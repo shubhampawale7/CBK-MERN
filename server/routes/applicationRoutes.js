@@ -2,8 +2,7 @@
 import express from "express";
 import {
   getApplications,
-  getApplicationByName,
-  getApplicationById, // UPDATED: Import the new function
+  getApplicationByIdOrName,
   createApplication,
   updateApplication,
   deleteApplication,
@@ -12,17 +11,19 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Get all applications
 router.get("/", getApplications);
 
-// This route can be used for SEO-friendly URLs if you need it later
-router.get("/name/:name", getApplicationByName);
+// Handles BOTH ObjectId and slug in a single route
+router.get("/:param", getApplicationByIdOrName);
 
-// UPDATED: This is the crucial change.
-// The route now correctly looks for an :id and uses the new controller function.
-router.get("/:id", getApplicationById);
-
+// Create a new application (protected route)
 router.post("/", protect, createApplication);
+
+// Update application by ID (protected route)
 router.put("/:id", protect, updateApplication);
+
+// Delete application by ID (protected route)
 router.delete("/:id", protect, deleteApplication);
 
 export default router;
