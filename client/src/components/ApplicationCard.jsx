@@ -8,35 +8,20 @@ const cardVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-// A short, descriptive write-up for each industry.
-const industryDescriptions = {
-  "Cement Plant":
-    "Solutions engineered for extreme abrasion and high temperatures in clinker chutes, cyclones, and mills.",
-  "Ore Processing":
-    "Robust protection for crushers, chutes, and feeders against severe impact and abrasion.",
-  Steel:
-    "Durability for the harsh conditions of sinter plants, blast furnaces, and coke handling systems.",
-  "Power Plant":
-    "Reliable wear resistance for critical components like coal mills, fans, and ash handling systems.",
-  "Coal Preparation":
-    "Maximizing the lifespan of high-wear equipment including bin liners, spiral chutes, and plough blades.",
-};
+// REMOVED: The static industryDescriptions object is no longer needed.
 
 const ApplicationCard = ({ application, icon: Icon }) => {
   if (!application || !application.industry) {
     return null;
   }
 
-  const urlSlug = application.industry.toLowerCase().replace(/\s+/g, "-");
-  const description =
-    industryDescriptions[application.industry] ||
-    "Key applications for this industry.";
+  // REMOVED: The urlSlug is no longer needed as we now use the database _id.
 
   return (
     <motion.div variants={cardVariants}>
+      {/* UPDATED: The NavLink now points to the correct URL using the application's database _id */}
       <NavLink
-        to={`/applications/${urlSlug}`}
-        // The `group` class is key to the advanced hover effects
+        to={`/applications/${application._id}`}
         className="group block bg-white dark:bg-brand-dark-light rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden"
       >
         {/* SVG Background Pattern */}
@@ -79,21 +64,26 @@ const ApplicationCard = ({ application, icon: Icon }) => {
           {/* Expanded Content (Visible on Hover) */}
           <div className="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500 ease-in-out overflow-hidden">
             <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+              {/* UPDATED: The description now comes from the application object from your API */}
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                {description}
+                {application.description}
               </p>
               <div className="flex flex-wrap gap-2">
-                {application.details.slice(0, 3).map((detail, index) => (
-                  <motion.span
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
-                    className="bg-gray-200 dark:bg-brand-dark text-gray-700 dark:text-gray-200 text-xs font-medium px-2.5 py-1 rounded-full"
-                  >
-                    {detail}
-                  </motion.span>
-                ))}
+                {/* UPDATED: The details now come from `applicationsList` to match your API model */}
+                {application.applicationsList &&
+                  application.applicationsList
+                    .slice(0, 3)
+                    .map((detail, index) => (
+                      <motion.span
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
+                        className="bg-gray-200 dark:bg-brand-dark text-gray-700 dark:text-gray-200 text-xs font-medium px-2.5 py-1 rounded-full"
+                      >
+                        {detail}
+                      </motion.span>
+                    ))}
               </div>
             </div>
           </div>

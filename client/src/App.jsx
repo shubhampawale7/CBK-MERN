@@ -102,7 +102,7 @@ function App() {
               }
             />
             <Route
-              path="/applications/:name"
+              path="/applications/:id"
               element={
                 <AnimatedPage>
                   <ApplicationDetails />
@@ -200,5 +200,4 @@ function App() {
   );
 }
 
-// NOTE: You need to wrap your App component with <Router> in main.jsx
 export default App;

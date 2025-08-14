@@ -1,20 +1,20 @@
 // client/src/pages/AdminApplicationList.jsx
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { FaEdit, FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
+import api from "../api"; // UPDATED: Import the central API file
 
 const AdminApplicationList = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Your original data fetching and handling logic is unchanged.
   const fetchApplications = async () => {
     try {
-      const { data } = await axios.get("/api/applications");
+      // UPDATED: The call now uses the central 'api' instance.
+      const { data } = await api.get("/api/applications");
       setApplications(data);
     } catch (error) {
       toast.error("Failed to fetch applications.");
@@ -39,7 +39,8 @@ const AdminApplicationList = () => {
         const config = {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         };
-        await axios.delete(`/api/applications/${id}`, config);
+        // UPDATED: The call now uses the central 'api' instance.
+        await api.delete(`/api/applications/${id}`, config);
         toast.success("Application deleted successfully!");
         fetchApplications();
       } catch (error) {
@@ -53,9 +54,7 @@ const AdminApplicationList = () => {
   const handleCreate = () => navigate("/admin/applications/create");
 
   return (
-    // This component assumes it's rendered within a layout that includes the AdminHeader.
     <div className="p-4 sm:p-6 lg:p-8 font-sans">
-      {/* Page Header */}
       <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
         <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
           Manage Applications
@@ -71,7 +70,6 @@ const AdminApplicationList = () => {
         </motion.button>
       </div>
 
-      {/* Content Area */}
       <div className="bg-white dark:bg-brand-dark-light rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         {loading ? (
           <div className="flex justify-center items-center h-64">

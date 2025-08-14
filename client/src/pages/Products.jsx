@@ -3,28 +3,14 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import ProductCard from "../components/ProductCard";
-import {
-  FaSearch,
-  FaStar,
-  FaShieldAlt,
-  FaFire,
-  FaTools,
-  FaSpinner,
-} from "react-icons/fa";
-import api from "../api"; // Import your central API file
-
-const filterCategories = [
-  { id: "all", name: "All Grades", icon: FaStar },
-  { id: "abrasion", name: "High Abrasion", icon: FaShieldAlt },
-  { id: "impact", name: "High Impact", icon: FaTools },
-  { id: "temperature", name: "High Temperature", icon: FaFire },
-];
+import { FaSearch, FaSpinner, FaArrowRight } from "react-icons/fa";
+import api from "../api";
+import { Link } from "react-router-dom";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -33,7 +19,6 @@ const Products = () => {
         setProducts(data);
       } catch (error) {
         console.error("Failed to fetch products:", error);
-        // You could add a toast notification for the user here
       } finally {
         setLoading(false);
       }
@@ -41,16 +26,14 @@ const Products = () => {
     fetchProducts();
   }, []);
 
-  const filteredProducts = products.filter((product) => {
-    const searchMatch =
+  const filteredProducts = products.filter(
+    (product) =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (product.description &&
-        product.description.toLowerCase().includes(searchQuery.toLowerCase()));
-    const categoryMatch =
-      activeFilter === "all" ||
-      (product.category && product.category.includes(activeFilter));
-    return searchMatch && categoryMatch;
-  });
+        product.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const featured = loading ? [] : products.slice(0, 2);
 
   return (
     <>
@@ -86,90 +69,118 @@ const Products = () => {
           </motion.div>
         </div>
 
-        <div className="max-w-screen-xl mx-auto px-4 py-16">
-          <div className="grid lg:grid-cols-4 gap-8">
-            <aside className="lg:col-span-1 lg:sticky top-28 h-fit">
-              <div className="p-6 bg-brand-light dark:bg-brand-dark-light rounded-xl shadow-lg">
-                <div className="relative mb-4">
-                  <input
-                    type="text"
-                    placeholder="Search products..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-full bg-white dark:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-orange-light"
-                  />
-                  <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-3">
-                  Categories
-                </h3>
-                <div className="space-y-2">
-                  {filterCategories.map((cat) => (
-                    <motion.button
-                      key={cat.id}
-                      onClick={() => setActiveFilter(cat.id)}
-                      className={`w-full flex items-center space-x-3 text-left p-3 rounded-md text-sm font-medium transition-all duration-200 ${
-                        activeFilter === cat.id
-                          ? "bg-brand-orange text-white"
-                          : "hover:bg-gray-200 dark:hover:bg-brand-dark"
-                      }`}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <cat.icon
-                        className={`flex-shrink-0 ${
-                          activeFilter === cat.id
-                            ? "text-white"
-                            : "text-brand-orange"
-                        }`}
-                      />
-                      <span>{cat.name}</span>
-                    </motion.button>
-                  ))}
-                </div>
+        <section className="py-20 bg-brand-light dark:bg-brand-dark-light">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-4xl font-bold text-center text-brand-orange dark:text-brand-orange-light mb-12">
+              Featured Grades
+            </h2>
+            {loading ? (
+              <div className="flex justify-center">
+                <FaSpinner className="animate-spin text-3xl text-brand-orange" />
               </div>
-            </aside>
-
-            <main className="lg:col-span-3">
-              {loading ? (
-                <div className="flex justify-center items-center h-64">
-                  <FaSpinner className="animate-spin text-4xl text-brand-orange" />
-                </div>
-              ) : (
-                <motion.div
-                  layout
-                  className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
-                >
-                  <AnimatePresence>
-                    {filteredProducts.length > 0 ? (
-                      filteredProducts.map((product) => (
-                        <ProductCard key={product._id} product={product} />
-                      ))
-                    ) : (
-                      <motion.div
-                        layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="col-span-full text-center py-16"
-                      >
-                        <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200">
-                          No Products Found
-                        </h3>
-                        <p className="mt-2 text-gray-500">
-                          Your search for "{searchQuery}" in "{activeFilter}"
-                          did not match any products.
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              )}
-            </main>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-8">
+                {featured.map((product) => (
+                  <FeaturedProductCard key={product._id} product={product} />
+                ))}
+              </div>
+            )}
           </div>
+        </section>
+
+        <div className="max-w-7xl mx-auto px-4 py-16">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
+              All Product Grades
+            </h2>
+            <div className="relative w-full md:w-auto">
+              <input
+                type="text"
+                placeholder="Search all products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full md:w-64 pl-10 pr-4 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-full bg-white dark:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-orange-light"
+              />
+              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <FaSpinner className="animate-spin text-4xl text-brand-orange" />
+            </div>
+          ) : (
+            <motion.div
+              layout
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+            >
+              <AnimatePresence>
+                {filteredProducts.length > 0 ? (
+                  filteredProducts.map((product) => (
+                    <ProductCard key={product._id} product={product} />
+                  ))
+                ) : (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="col-span-full text-center py-16"
+                  >
+                    <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200">
+                      No Products Found
+                    </h3>
+                    <p className="mt-2 text-gray-500">
+                      Your search for "{searchQuery}" did not match any
+                      products.
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
         </div>
       </div>
     </>
+  );
+};
+
+// CORRECTED: This helper component now creates a URL slug from the product name.
+const FeaturedProductCard = ({ product }) => {
+  const urlSlug = product.name.toLowerCase().replace(/\s+/g, "-");
+  return (
+    <Link
+      to={`/products/${urlSlug}`}
+      className="group block bg-white dark:bg-brand-dark rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden"
+    >
+      <div className="grid md:grid-cols-2 items-center">
+        <div className="p-8">
+          <span className="bg-brand-orange text-white text-xs font-bold px-3 py-1.5 rounded-full">
+            {product.hardness}
+          </span>
+          <h3 className="mt-4 text-3xl font-bold text-gray-800 dark:text-white">
+            {product.name}
+          </h3>
+          <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
+            {product.description}
+          </p>
+          <div className="mt-4 flex items-center justify-start text-brand-orange font-semibold">
+            <span>View Full Details</span>
+            <FaArrowRight className="ml-2 transform group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+        <div className="h-64 md:h-full">
+          <img
+            src={
+              product.applicationImage ||
+              "/images/applications/generic-chute.jpg"
+            }
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+    </Link>
   );
 };
 

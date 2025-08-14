@@ -1,236 +1,60 @@
 // client/src/pages/ApplicationDetails.jsx
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import {
   FaChevronLeft,
   FaIndustry,
   FaShieldAlt,
   FaTools,
+  FaSpinner,
+  FaCheck,
 } from "react-icons/fa";
 import ProductCard from "../components/ProductCard";
-
-// The complete static database for all 5 industries, powered by your brochure.
-const applicationDatabase = {
-  "cement-plant": {
-    industry: "Cement Plant",
-    tagline: "Durability in the Dust: Wear Solutions for Cement Production.",
-    description:
-      "The cement industry presents extreme challenges with high abrasion from clinker and high temperatures in kilns and coolers. Our wear plates are engineered to maximize the lifespan of critical components, reducing costly downtime.",
-    image: "/images/applications/cement.jpg",
-    atAGlance: [
-      { icon: FaShieldAlt, text: "High Abrasion Resistance" },
-      { icon: FaTools, text: "Reduced Maintenance Costs" },
-      { icon: FaIndustry, text: "Increased Uptime" },
-    ],
-    applicationsList: [
-      "Clinker Chutes",
-      "Cyclones",
-      "Dust Exhaust Fans",
-      "Ball Mill Inlets & Outlets",
-      "Air Chamber Rings",
-      "Shifters & Shifter Blades",
-      "Transfer Points",
-      "Silo Outlets",
-    ],
-    recommendedProducts: [
-      {
-        name: "CBK 5S",
-        description: "Excellent for fans in high-temperature environments.",
-        hardness: "58-62 Rc",
-      },
-      {
-        name: "CBK 14",
-        description: "Complex carbides for severe conditions up to 600°C.",
-        hardness: "60-64 Rc",
-      },
-      {
-        name: "CBK 23",
-        description: "Handles extreme abrasion and temperatures up to 750°C.",
-        hardness: "60-65 Rc",
-      },
-    ],
-  },
-  "ore-processing": {
-    industry: "Ore Processing",
-    tagline: "Strength Against the Stone: Fortifying Ore Processing Equipment.",
-    description:
-      "From crushing to conveying, ore processing involves constant, severe impact and abrasion. Our wear plates provide robust protection for chutes, crushers, and feeders, ensuring continuous operation.",
-    image: "/images/applications/ore-banner.jpg",
-    atAGlance: [
-      { icon: FaShieldAlt, text: "High Impact Toughness" },
-      { icon: FaTools, text: "Extended Component Life" },
-      { icon: FaIndustry, text: "Improved Throughput" },
-    ],
-    applicationsList: [
-      "Transfer Chutes",
-      "Skirt Liners",
-      "Bin Liners (Surge, Hopper, Reject)",
-      "Reclaimer Liners",
-      "Vibratory Feeder Liners",
-      "Flop Gate Liners",
-      "Crusher Liners",
-      "Screen Plates",
-    ],
-    recommendedProducts: [
-      {
-        name: "CBK Ti",
-        description:
-          "Titanium carbide composition for superior impact resistance.",
-        hardness: "56-58 Rc",
-      },
-      {
-        name: "CBK 1",
-        description: "A workhorse for heavy abrasion with moderate impact.",
-        hardness: "58-62 Rc",
-      },
-      {
-        name: "CBK V CARB",
-        description:
-          "Ideal for extreme sliding abrasion in feeders and chutes.",
-        hardness: "62-64 Rc",
-      },
-    ],
-  },
-  steel: {
-    industry: "Steel",
-    tagline: "Forged for Fire: Wear Plates for Steel Manufacturing.",
-    description:
-      "Steel production involves intense heat and abrasive materials. Our plates protect critical equipment like sinter coolers, discharge chutes, and blast furnace components from premature wear.",
-    image: "/images/applications/steel.jpg",
-    atAGlance: [
-      { icon: FaShieldAlt, text: "High Temperature Resistance" },
-      { icon: FaTools, text: "Protection for Critical Machinery" },
-      { icon: FaIndustry, text: "Operational Reliability" },
-    ],
-    applicationsList: [
-      "Hot Screen",
-      "Sinter Cooler",
-      "Discharge Chute",
-      "Dedusting Van",
-      "Skip Hoist",
-      "Blast Furnace Closers",
-      "Distribution Chute",
-      "Vibratory Feeders",
-    ],
-    recommendedProducts: [
-      {
-        name: "CBK 14",
-        description: "Withstands severe abrasion at temperatures up to 600°C.",
-        hardness: "60-64 Rc",
-      },
-      {
-        name: "CBK 23",
-        description: "Our premium grade for extreme heat and wear up to 750°C.",
-        hardness: "60-65 Rc",
-      },
-      {
-        name: "CBK W CARB",
-        description:
-          "Tungsten carbide for ultimate resistance in high-wear zones.",
-        hardness: "60-65 Rc",
-      },
-    ],
-  },
-  "coal-preparation": {
-    industry: "Coal Preparation",
-    tagline: "Engineered for Endurance: Solutions for Coal Handling.",
-    description:
-      "Coal handling is a high-volume, high-abrasion process. We provide durable linings for chutes, bins, and crushers to keep operations running smoothly and efficiently.",
-    image: "/images/applications/coal.jpg",
-    atAGlance: [
-      { icon: FaShieldAlt, text: "Sliding Abrasion Protection" },
-      { icon: FaTools, text: "Reduced Material Buildup" },
-      { icon: FaIndustry, text: "Maximized Equipment Life" },
-    ],
-    applicationsList: [
-      "Transfer Chutes",
-      "Bin Liners",
-      "Deflector Liners",
-      "Flop Gate Liners",
-      "Plough Blades",
-      "Crusher Liners",
-      "Spiral Chutes",
-      "Washer Pipework",
-    ],
-    recommendedProducts: [
-      {
-        name: "CBK STD",
-        description:
-          "An excellent standard choice for general abrasion resistance.",
-        hardness: "58-60 Rc",
-      },
-      {
-        name: "CBK 1 Plus",
-        description:
-          "Enhanced carbides for severe abrasion in high-flow areas.",
-        hardness: "58-62 Rc",
-      },
-      {
-        name: "CBK V CARB",
-        description:
-          "Designed specifically to combat extreme sliding abrasion.",
-        hardness: "62-64 Rc",
-      },
-    ],
-  },
-  "power-plant": {
-    industry: "Power Plant",
-    tagline: "Powering Through Wear: Reliability for Power Generation.",
-    description:
-      "In power plants, equipment reliability is paramount. Our wear plates protect vital components like coal mills, fans, and ash handling systems from abrasive wear, ensuring consistent energy production.",
-    image: "/images/applications/power.jpg",
-    atAGlance: [
-      { icon: FaShieldAlt, text: "Erosion & Abrasion Control" },
-      { icon: FaTools, text: "Component Longevity" },
-      { icon: FaIndustry, text: "Prevention of Outages" },
-    ],
-    applicationsList: [
-      "I.D. Fan / P.A. Fan",
-      "Coal Mill Wear Plates",
-      "Coal Feeders",
-      "Scraper Blades",
-      "Ash Pump Impellers & Casings",
-      "Coal Handling Plant Chutes",
-      "Coal Mill Bends",
-    ],
-    recommendedProducts: [
-      {
-        name: "CBK 5S",
-        description:
-          "The premier choice for high-temperature fan blades and casings.",
-        hardness: "58-62 Rc",
-      },
-      {
-        name: "CBK B CARB",
-        description:
-          "Boron carbide composition for extreme abrasion in coal mills.",
-        hardness: "61-64 Rc",
-      },
-      {
-        name: "CBK 1",
-        description:
-          "A versatile solution for chutes and feeders in the coal handling plant.",
-        hardness: "58-62 Rc",
-      },
-    ],
-  },
-};
+import api from "../api";
 
 const ApplicationDetails = () => {
-  const { name } = useParams();
+  const { id } = useParams();
   const [application, setApplication] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Parallax scroll effect for the hero image
+  const { scrollYProgress } = useScroll();
+  const yRange = useTransform(scrollYProgress, [0, 0.2], [0, -50]);
 
   useEffect(() => {
-    setApplication(applicationDatabase[name]);
-  }, [name]);
+    if (id) {
+      const fetchApplication = async () => {
+        try {
+          setLoading(true);
+          const { data } = await api.get(`/api/applications/${id}`);
+          setApplication(data);
+        } catch (error) {
+          console.error("Failed to fetch application details:", error);
+          setApplication(null);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchApplication();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-white dark:bg-brand-dark">
+        <FaSpinner className="animate-spin text-4xl text-brand-orange" />
+      </div>
+    );
+  }
 
   if (!application) {
     return (
       <div className="text-center py-20 bg-white dark:bg-brand-dark min-h-screen">
+        <h2 className="text-2xl font-bold">Application Not Found</h2>
         <p className="text-gray-600 dark:text-gray-400">
-          Application not found.
+          The application you are looking for does not exist.
         </p>
         <Link
           to="/applications"
@@ -242,6 +66,21 @@ const ApplicationDetails = () => {
     );
   }
 
+  const iconMap = {
+    "High Abrasion Resistance": FaShieldAlt,
+    "Reduced Maintenance Costs": FaTools,
+    "Increased Uptime": FaIndustry,
+    "High Impact Toughness": FaShieldAlt,
+    "Extended Component Life": FaTools,
+    "Operational Reliability": FaIndustry,
+    "Sliding Abrasion Protection": FaShieldAlt,
+    "Maximized Equipment Life": FaIndustry,
+    "Erosion & Abrasion Control": FaShieldAlt,
+    "Component Longevity": FaTools,
+    "Prevention of Outages": FaIndustry,
+    "Improved Throughput": FaIndustry,
+  };
+
   return (
     <>
       <Helmet>
@@ -250,15 +89,12 @@ const ApplicationDetails = () => {
       </Helmet>
       <div className="bg-white dark:bg-brand-dark font-sans">
         {/* Hero Section */}
-        <div className="relative h-[50vh] bg-gray-800 flex items-center justify-center text-center px-4 overflow-hidden">
+        <div className="relative h-[60vh] bg-gray-900 flex items-center justify-center text-center px-4 overflow-hidden">
           <motion.div
-            style={{ backgroundImage: `url(${application.image})` }}
+            style={{ backgroundImage: `url(${application.image})`, y: yRange }}
             className="absolute inset-0 bg-cover bg-center"
-            initial={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 10, ease: "linear" }}
           ></motion.div>
-          <div className="absolute inset-0 bg-black/60"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -272,83 +108,115 @@ const ApplicationDetails = () => {
               <FaChevronLeft className="mr-2" />
               Back to Applications
             </Link>
-            <h1 className="text-5xl md:text-6xl font-extrabold text-white tracking-tight">
+            <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight drop-shadow-2xl">
               {application.industry}
             </h1>
-            <p className="mt-4 text-xl max-w-3xl mx-auto text-gray-200">
+            <p className="mt-4 text-xl max-w-3xl mx-auto text-gray-200 drop-shadow-lg">
               {application.tagline}
             </p>
           </motion.div>
         </div>
 
         {/* Introduction & At a Glance */}
-        <section className="py-20">
-          <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-5 gap-12 items-center">
-            <div className="lg:col-span-3">
-              <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
-                The Challenge
+        <section className="py-20 bg-brand-light dark:bg-brand-dark-light">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center"
+          >
+            <div className="pr-8">
+              <h2 className="text-4xl font-bold text-gray-800 dark:text-white leading-tight">
+                The{" "}
+                <span className="text-brand-orange">
+                  {application.industry}
+                </span>{" "}
+                Challenge
               </h2>
               <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
                 {application.description}
               </p>
             </div>
-            <div className="lg:col-span-2 bg-brand-light dark:bg-brand-dark-light p-8 rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                At a Glance:
-              </h3>
-              <ul className="space-y-4">
-                {application.atAGlance.map((item, i) => (
-                  <li key={i} className="flex items-center space-x-3">
-                    <item.icon className="text-brand-orange text-2xl flex-shrink-0" />
-                    <span className="text-gray-700 dark:text-gray-200">
-                      {item.text}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+            <div className="space-y-4">
+              {application.atAGlance &&
+                application.atAGlance.map((item, i) => {
+                  const Icon = iconMap[item.text] || FaTools;
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: 50 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.2 }}
+                      className="flex items-center space-x-4 bg-white dark:bg-brand-dark p-4 rounded-lg shadow-md"
+                    >
+                      <Icon className="text-brand-orange text-3xl flex-shrink-0" />
+                      <span className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                        {item.text}
+                      </span>
+                    </motion.div>
+                  );
+                })}
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* Common Use Cases Grid */}
-        <section className="py-20 bg-brand-light dark:bg-brand-dark-light">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <h2 className="text-4xl font-bold text-brand-orange dark:text-brand-orange-light">
-              Common Use Cases
-            </h2>
-            <div className="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              {application.applicationsList.map((app, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true, amount: 0.5 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="bg-white dark:bg-brand-dark p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow"
-                >
-                  <p className="font-semibold text-gray-800 dark:text-white">
-                    {app}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
+        <section className="py-20 bg-white dark:bg-brand-dark relative overflow-hidden">
+          <div className="absolute inset-0 opacity-5 dark:opacity-10">
+            <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px]"></div>
+          </div>
+          <div className="relative max-w-7xl mx-auto px-4 text-center">
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl font-bold text-brand-orange dark:text-brand-orange-light"
+            >
+              Key Application Areas
+            </motion.h2>
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+              className="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+            >
+              {application.applicationsList &&
+                application.applicationsList.map((app, index) => (
+                  <motion.div
+                    key={index}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0 },
+                    }}
+                    className="group relative bg-brand-light dark:bg-brand-dark-light p-6 rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
+                  >
+                    <div className="absolute top-0 left-0 w-full h-1 bg-brand-orange scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center"></div>
+                    <p className="font-semibold text-gray-800 dark:text-white">
+                      {app}
+                    </p>
+                  </motion.div>
+                ))}
+            </motion.div>
           </div>
         </section>
 
         {/* Recommended Products Section */}
-        <section className="py-20">
+        <section className="py-20 bg-brand-light dark:bg-brand-dark-light">
           <div className="max-w-7xl mx-auto px-4 text-center">
             <h2 className="text-4xl font-bold text-brand-orange dark:text-brand-orange-light">
-              Recommended Products
+              Recommended Products for {application.industry}
             </h2>
             <p className="mt-4 text-lg max-w-3xl mx-auto text-gray-700 dark:text-gray-300">
-              These grades are specifically engineered for the demanding
-              conditions of the {application.industry}.
+              These grades are specifically engineered to provide optimal
+              performance and longevity in this demanding environment.
             </p>
             <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {application.recommendedProducts.map((product) => (
-                <ProductCard key={product.name} product={product} />
-              ))}
+              {application.recommendedProducts &&
+                application.recommendedProducts.map((product) => (
+                  <ProductCard key={product.name} product={product} />
+                ))}
             </div>
           </div>
         </section>
@@ -357,11 +225,11 @@ const ApplicationDetails = () => {
         <section className="bg-brand-dark">
           <div className="max-w-7xl mx-auto text-center py-16 px-4">
             <h2 className="text-3xl font-bold text-white">
-              Optimize Your {application.industry} Operations
+              Optimize Your Operations
             </h2>
             <p className="mt-2 text-lg text-gray-300">
-              Reduce downtime and maintenance costs. Contact us for a
-              specialized quote.
+              Contact us to discuss your specific needs for the{" "}
+              {application.industry}.
             </p>
             <Link to="/contact">
               <motion.button

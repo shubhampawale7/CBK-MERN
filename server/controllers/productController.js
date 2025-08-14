@@ -1,7 +1,8 @@
 // server/controllers/productController.js (Updated)
-
+import mongoose from "mongoose";
 import Product from "../models/Product.js";
 
+// Get all products
 // Get all products
 export const getProducts = async (req, res) => {
   try {
@@ -11,6 +12,29 @@ export const getProducts = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching products", error: error.message });
+  }
+};
+
+export const getProductById = async (req, res) => {
+  // This check now works because mongoose is imported.
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res
+      .status(404)
+      .json({ message: "Product not found (invalid ID format)" });
+  }
+
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (product) {
+      res.json(product);
+    } else {
+      res.status(404).json({ message: "Product not found" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching product", error: error.message });
   }
 };
 
@@ -116,5 +140,29 @@ export const deleteProduct = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error deleting product", error: error.message });
+  }
+};
+export const getProductBySlug = async (req, res) => {
+  try {
+    // 1. Get the slug from the URL params (e.g., "cbk-eco")
+    const productSlug = req.params.slug;
+
+    // 2. Convert the slug into a format that can be searched (e.g., "cbk eco")
+    const searchName = productSlug.replace(/-/g, " ");
+
+    // 3. Find the product in the database using a case-insensitive search on the 'name' field.
+    const product = await Product.findOne({
+      name: { $regex: new RegExp(`^${searchName}$`, "i") },
+    });
+
+    if (product) {
+      res.json(product);
+    } else {
+      res.status(404).json({ message: "Product not found" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching product", error: error.message });
   }
 };

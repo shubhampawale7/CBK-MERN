@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { NavLink } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
 
-// The filename is "commonproduct.jpg" (singular).
+// CORRECTED: The filename is now "commonproduct.jpg" (singular) to match your asset folder.
 import commonProductImage from "../assets/commonproducts.jpg";
 
 const cardVariants = {

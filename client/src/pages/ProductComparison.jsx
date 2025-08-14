@@ -1,5 +1,5 @@
 // client/src/pages/ProductComparison.jsx
-import { useState, useEffect } from "react"; // ADDED useEffect
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
@@ -10,27 +10,23 @@ import {
   FaStar,
   FaArrowRight,
   FaSpinner,
-} from "react-icons/fa"; // ADDED FaSpinner
-import api from "../api"; // ADDED api import
-
-// REMOVED: The static allProducts array has been removed.
+} from "react-icons/fa";
+import api from "../api";
 
 const MAX_HARDNESS = 70;
 const MAX_TEMP = 800;
 
 const ProductComparison = () => {
-  const [allProducts, setAllProducts] = useState([]); // ADDED: State for all products from API
-  const [loading, setLoading] = useState(true); // ADDED: Loading state
-  const [selectedProducts, setSelectedProducts] = useState([]); // UPDATED: Initial state is empty
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
-  // ADDED: useEffect to fetch all products from the API on component mount.
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const { data } = await api.get("/api/products");
         setAllProducts(data);
-        // Set an initial selection of products for demonstration
         if (data.length >= 3) {
           setSelectedProducts([data[0], data[1], data[2]]);
         } else {
@@ -134,64 +130,70 @@ const ProductComparison = () => {
 
 // --- Helper Components ---
 
-const ComparisonCard = ({ product, onRemove }) => (
-  <motion.div
-    layout
-    initial={{ opacity: 0, scale: 0.8 }}
-    animate={{ opacity: 1, scale: 1 }}
-    exit={{ opacity: 0, scale: 0.8 }}
-    transition={{ duration: 0.4, ease: "easeOut" }}
-    className="relative bg-white dark:bg-brand-dark-light rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 flex flex-col"
-  >
-    <button
-      onClick={() => onRemove(product._id)}
-      className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors z-10"
+const ComparisonCard = ({ product, onRemove }) => {
+  // CORRECTED: Create the URL slug from the product name here.
+  const urlSlug = product.name.toLowerCase().replace(/\s+/g, "-");
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.8 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="relative bg-white dark:bg-brand-dark-light rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 flex flex-col"
     >
-      <FaTimes />
-    </button>
-    <div className="p-6">
-      <h3 className="text-2xl font-bold text-brand-orange dark:text-brand-orange-light">
-        {product.name}
-      </h3>
-      <p className="text-sm text-gray-500 mt-1">{product.description}</p>
-    </div>
-    <div className="p-6 space-y-4 flex-grow">
-      <SpecMeter
-        label="Hardness"
-        value={product.hardness}
-        maxValue={MAX_HARDNESS}
-        unit="Rc"
-      />
-      <SpecMeter
-        label="Max Temperature"
-        value={product.temp}
-        maxValue={MAX_TEMP}
-        unit="°C"
-      />
-      <div className="pt-4">
-        <h4 className="text-sm font-bold text-gray-800 dark:text-white mb-2 flex items-center">
-          <FaStar className="text-yellow-500 mr-2" />
-          Best For
-        </h4>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {product.bestFor}
-        </p>
-      </div>
-    </div>
-    <div className="p-6 mt-auto bg-brand-light dark:bg-brand-dark rounded-b-xl">
-      <Link
-        to={`/products/${product._id}`} // UPDATED: Link to product._id
-        className="group inline-flex items-center space-x-2 text-brand-orange font-semibold"
+      <button
+        onClick={() => onRemove(product._id)}
+        className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors z-10"
       >
-        <span>View Full Details</span>
-        <FaArrowRight className="transform group-hover:translate-x-1 transition-transform" />
-      </Link>
-    </div>
-  </motion.div>
-);
+        <FaTimes />
+      </button>
+      <div className="p-6">
+        <h3 className="text-2xl font-bold text-brand-orange dark:text-brand-orange-light">
+          {product.name}
+        </h3>
+        <p className="text-sm text-gray-500 mt-1">{product.description}</p>
+      </div>
+      <div className="p-6 space-y-4 flex-grow">
+        <SpecMeter
+          label="Hardness"
+          value={parseInt(product.hardness)}
+          maxValue={MAX_HARDNESS}
+          unit="Rc"
+        />
+        <SpecMeter
+          label="Max Temperature"
+          value={parseInt(product.temp)}
+          maxValue={MAX_TEMP}
+          unit="°C"
+        />
+        <div className="pt-4">
+          <h4 className="text-sm font-bold text-gray-800 dark:text-white mb-2 flex items-center">
+            <FaStar className="text-yellow-500 mr-2" />
+            Best For
+          </h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {product.bestFor}
+          </p>
+        </div>
+      </div>
+      <div className="p-6 mt-auto bg-brand-light dark:bg-brand-dark rounded-b-xl">
+        {/* CORRECTED: The link now uses the correctly generated urlSlug */}
+        <Link
+          to={`/products/${urlSlug}`}
+          className="group inline-flex items-center space-x-2 text-brand-orange font-semibold"
+        >
+          <span>View Full Details</span>
+          <FaArrowRight className="transform group-hover:translate-x-1 transition-transform" />
+        </Link>
+      </div>
+    </motion.div>
+  );
+};
 
 const SpecMeter = ({ label, value, maxValue, unit }) => {
-  const percentage = value ? (parseInt(value) / maxValue) * 100 : 0;
+  const percentage = value ? (value / maxValue) * 100 : 0;
   return (
     <div>
       <div className="flex justify-between items-baseline mb-1">

@@ -1,4 +1,5 @@
 // server/controllers/applicationController.js
+import mongoose from "mongoose";
 import Application from "../models/Application.js";
 
 export const getApplications = async (req, res) => {
@@ -89,5 +90,20 @@ export const deleteApplication = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error deleting application", error: error.message });
+  }
+};
+export const getApplicationById = async (req, res) => {
+  try {
+    const application = await Application.findById(req.params.id);
+
+    if (application) {
+      res.json(application);
+    } else {
+      res.status(404).json({ message: "Application not found" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching application", error: error.message });
   }
 };

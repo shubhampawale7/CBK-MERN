@@ -1,10 +1,13 @@
 // client/src/pages/Home.jsx
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import ApplicationCard from "../components/ApplicationCard";
 import Testimonials from "../components/Testimonials";
+import FixingMethods from "../components/FixingMethods";
+import SpecificationsOverview from "../components/SpecificationsOverview";
 import {
   FaIndustry,
   FaHardHat,
@@ -16,73 +19,57 @@ import {
   FaCogs,
   FaUserTie,
   FaHandshake,
+  FaSpinner, // Added for loading state
 } from "react-icons/fa";
-import SpecificationsOverview from "../components/SpecificationsOverview";
-import FixingMethods from "../components/FixingMethods";
+import api from "../api"; // Import the central API file
 
-// Data arrays for featured content
-const featuredProducts = [
-  {
-    name: "CBK ECO",
-    description: "Abrasion Resistant and Mild Impact Resistant",
-    hardness: "55-58 Rc",
-  },
-  {
-    name: "CBK STD",
-    description: "Abrasion Resistant and Mild Impact Resistant",
-    hardness: "58-60 Rc",
-  },
-  {
-    name: "CBK 14",
-    description:
-      "Complex Carbide of Chromium, Niobium, Vanadium, Tungsten, Molybdenum",
-    hardness: "60-64 Rc",
-  },
-  {
-    name: "CBK Ti",
-    description: "Titanium Carbide for Impact Resistance",
-    hardness: "56-58 Rc",
-  },
-];
-const industries = [
-  {
-    industry: "Cement Plant",
-    details: ["Cyclone", "Clinker Chute", "Transfer Points"],
-    to: "/applications/cement-plant",
-  },
-  {
-    industry: "Ore Processing",
-    details: ["Transfer Chutes", "Crusher Liners", "Screen Plates"],
-    to: "/applications/ore-processing",
-  },
-  {
-    industry: "Steel",
-    details: ["Sintering Cooler", "Discharge Chutes", "Blast Furnace Closers"],
-    to: "/applications/steel",
-  },
-  {
-    industry: "Power Plant",
-    details: ["Coal Mill Rings", "Scraper Blades", "Ash Pump Impellers"],
-    to: "/applications/power-plant",
-  },
-];
+// REMOVED: Static data arrays for featuredProducts and industries are now fetched from the API.
+
 const iconMap = {
   "Cement Plant": FaBuilding,
   "Ore Processing": FaHardHat,
   Steel: FaTools,
   "Power Plant": FaBolt,
+  "Coal Preparation": FaIndustry,
 };
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
 };
+
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 };
 
 const Home = () => {
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [industries, setIndustries] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        // Fetch both products and applications at the same time
+        const [productsRes, applicationsRes] = await Promise.all([
+          api.get("/api/products"),
+          api.get("/api/applications"),
+        ]);
+
+        // Take the first 4 products as "featured"
+        setFeaturedProducts(productsRes.data.slice(0, 4));
+        // Take the first 4 industries to feature on the homepage
+        setIndustries(applicationsRes.data.slice(0, 4));
+      } catch (error) {
+        console.error("Failed to fetch homepage data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHomeData();
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -211,11 +198,17 @@ const Home = () => {
             <h2 className="text-4xl font-bold text-center text-brand-orange dark:text-brand-orange-light">
               Our Featured Wear Plate Grades
             </h2>
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.name} product={product} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex justify-center mt-12">
+                <FaSpinner className="animate-spin text-4xl text-brand-orange" />
+              </div>
+            ) : (
+              <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {featuredProducts.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
+              </div>
+            )}
             <div className="mt-12 text-center">
               <Link
                 to="/products"
@@ -228,7 +221,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* NEW SECTIONS: We assume you have the redesigned components for these */}
         <SpecificationsOverview />
         <FixingMethods />
 
@@ -243,18 +235,24 @@ const Home = () => {
               processing, our wear plates are proven to perform in the most
               demanding industrial environments.
             </p>
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {industries.map((app) => {
-                const IconComponent = iconMap[app.industry] || FaIndustry;
-                return (
-                  <ApplicationCard
-                    key={app.industry}
-                    application={app}
-                    icon={IconComponent}
-                  />
-                );
-              })}
-            </div>
+            {loading ? (
+              <div className="flex justify-center mt-12">
+                <FaSpinner className="animate-spin text-4xl text-brand-orange" />
+              </div>
+            ) : (
+              <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {industries.map((app) => {
+                  const IconComponent = iconMap[app.industry] || FaIndustry;
+                  return (
+                    <ApplicationCard
+                      key={app._id}
+                      application={app}
+                      icon={IconComponent}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 
@@ -305,7 +303,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Testimonials Section */}
         <Testimonials />
       </div>
     </>

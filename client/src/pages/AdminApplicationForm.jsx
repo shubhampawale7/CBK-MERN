@@ -1,7 +1,7 @@
 // client/src/pages/AdminApplicationForm.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api"; // UPDATED: Use the central API file
 import { motion } from "framer-motion";
 import { FaSave, FaArrowLeft, FaSpinner } from "react-icons/fa";
 import { toast } from "sonner";
@@ -16,46 +16,51 @@ const AdminApplicationForm = () => {
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
 
-  // Your original data fetching logic is unchanged.
   useEffect(() => {
+    const fetchApplication = async () => {
+      try {
+        setLoading(true);
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        const config = {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        };
+
+        // UPDATED: Using 'api.get' with authorization
+        const { data } = await api.get(`/api/applications/${id}`, config);
+
+        setFormData({
+          industry: data.industry,
+          applicationsList: data.applicationsList.join(", "),
+        });
+      } catch (error) {
+        toast.error("Failed to fetch application data.");
+        navigate("/admin/dashboard");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (id) {
-      setLoading(true);
-      const fetchApplication = async () => {
-        try {
-          const { data } = await axios.get(`/api/applications/${id}`);
-          setFormData({
-            industry: data.industry,
-            applicationsList: data.applicationsList.join(", "),
-          });
-        } catch (error) {
-          toast.error("Failed to fetch application data.");
-        } finally {
-          setLoading(false);
-        }
-      };
       fetchApplication();
     }
-  }, [id]);
+  }, [id, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Your original submission logic is unchanged.
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const userInfo = localStorage.getItem("userInfo");
-    // This is a simplified check. In a real app, you'd validate the token.
-    if (!userInfo) {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    if (!userInfo || !userInfo.token) {
       toast.error("You must be logged in to perform this action.");
       setLoading(false);
       navigate("/admin/login");
       return;
     }
-    const token = JSON.parse(userInfo).token;
-
+    const token = userInfo.token;
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -72,10 +77,12 @@ const AdminApplicationForm = () => {
       };
 
       if (isEditMode) {
-        await axios.put(`/api/applications/${id}`, applicationData, config);
+        // UPDATED: Using 'api.put'
+        await api.put(`/api/applications/${id}`, applicationData, config);
         toast.success("Application updated successfully!");
       } else {
-        await axios.post("/api/applications", applicationData, config);
+        // UPDATED: Using 'api.post'
+        await api.post("/api/applications", applicationData, config);
         toast.success("Application created successfully!");
       }
       navigate("/admin/dashboard");
@@ -92,8 +99,6 @@ const AdminApplicationForm = () => {
     "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2";
 
   return (
-    // This component assumes it's rendered within a layout that includes the AdminHeader.
-    // The parent div provides the overall page background color.
     <div className="p-4 sm:p-6 lg:p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}

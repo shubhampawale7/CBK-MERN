@@ -1,13 +1,10 @@
 // server/middleware/authMiddleware.js
-
-import jwt from "jsonwebtoken"; // We'll add this later for full auth
+import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 export const protect = async (req, res, next) => {
   let token;
 
-  // For this simplified version, we'll assume a basic authentication header
-  // In a real application, you'd use a JWT
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -16,12 +13,15 @@ export const protect = async (req, res, next) => {
       // Get token from header
       token = req.headers.authorization.split(" ")[1];
 
-      // Verify token and get user ID (placeholder logic)
-      // const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      // req.user = await User.findById(decoded.id).select('-password');
-      req.user = { email: "admin@cbk.com" }; // Placeholder user object for now
+      // UPDATED: This is the real verification logic that should be used.
+      // 1. Verify the token using your secret key
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      next();
+      // 2. Find the user in the database using the ID from the token
+      //    and attach the user object to the request (without the password)
+      req.user = await User.findById(decoded.id).select("-password");
+
+      next(); // Proceed to the next step (the controller function)
     } catch (error) {
       console.error(error);
       res.status(401).json({ message: "Not authorized, token failed" });

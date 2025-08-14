@@ -12,16 +12,14 @@ import {
   FaSpinner,
 } from "react-icons/fa";
 import PlaceholderImage from "../components/PlaceholderImage";
-import api from "../api"; // Using the central API file
+import api from "../api";
 
 // Import your local microstructure images
 import cbkEcoImage from "../assets/micro-cbk-eco.png";
 import cbkStdImage from "../assets/micro-cbk-std.png";
 import cbk1Image from "../assets/micro-cbk-1.png";
 import cbk1PlusImage from "../assets/micro-cbk-1-plus.png";
-// (add other image imports here if you get them later)
 
-// The imageMap for the locally stored images
 const imageMap = {
   "CBK ECO": cbkEcoImage,
   "CBK STD": cbkStdImage,
@@ -41,16 +39,20 @@ const ProductDetails = () => {
         setLoading(true);
         const { data } = await api.get(`/api/products/${id}`);
         setProduct(data);
-        // Set the initial main image after data is fetched
         setMainImage(imageMap[data.name] || data.applicationImage || null);
       } catch (error) {
         console.error("Failed to fetch product details:", error);
-        // You can add a toast notification here
+        setProduct(null);
       } finally {
         setLoading(false);
       }
     };
-    fetchProduct();
+
+    // CORRECTED: This check prevents the API call from running if the `id` is not yet available.
+    // This is the definitive fix for the "undefined" error.
+    if (id) {
+      fetchProduct();
+    }
   }, [id]);
 
   if (loading) {
@@ -88,7 +90,6 @@ const ProductDetails = () => {
         <meta name="description" content={product.description} />
       </Helmet>
       <div className="bg-white dark:bg-brand-dark font-sans">
-        {/* Product Hero Section */}
         <section className="relative pt-32 pb-20 bg-brand-light dark:bg-brand-dark-light">
           <div className="relative max-w-7xl mx-auto px-4">
             <Link
@@ -116,10 +117,8 @@ const ProductDetails = () => {
           </div>
         </section>
 
-        {/* Main Content Area */}
         <div className="py-20 max-w-7xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
-            {/* Left Column: Sticky Image Gallery */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -181,7 +180,6 @@ const ProductDetails = () => {
               </div>
             </motion.div>
 
-            {/* Right Column: Details */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -277,7 +275,6 @@ const ProductDetails = () => {
   );
 };
 
-// Helper Component for the Technical Data table
 const SpecRow = ({ label, value }) => (
   <div className="py-3 grid grid-cols-2">
     <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">

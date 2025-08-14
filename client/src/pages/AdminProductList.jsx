@@ -1,20 +1,19 @@
 // client/src/pages/AdminProductList.jsx
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { FaEdit, FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
+import api from "../api";
 
 const AdminProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Your original data fetching logic is unchanged.
   const fetchProducts = async () => {
     try {
-      const { data } = await axios.get("/api/products");
+      const { data } = await api.get("/api/products");
       setProducts(data);
     } catch (error) {
       toast.error("Failed to fetch products.");
@@ -28,7 +27,6 @@ const AdminProductList = () => {
     fetchProducts();
   }, []);
 
-  // Your original delete logic is unchanged.
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
@@ -36,7 +34,7 @@ const AdminProductList = () => {
         const config = {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         };
-        await axios.delete(`/api/products/${id}`, config);
+        await api.delete(`/api/products/${id}`, config);
         toast.success("Product deleted successfully!");
         fetchProducts();
       } catch (error) {
@@ -46,12 +44,15 @@ const AdminProductList = () => {
     }
   };
 
-  const handleEdit = (id) => navigate(`/admin/products/${id}/edit`);
+  // CORRECTED: The handleEdit function now navigates using the product's database _id
+  const handleEdit = (productId) => {
+    navigate(`/admin/products/${productId}/edit`);
+  };
+
   const handleCreate = () => navigate("/admin/products/create");
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 font-sans">
-      {/* Page Header */}
       <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
         <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
           Manage Products
@@ -67,7 +68,6 @@ const AdminProductList = () => {
         </motion.button>
       </div>
 
-      {/* Content Area */}
       <div className="bg-white dark:bg-brand-dark-light rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         {loading ? (
           <div className="flex justify-center items-center h-64">
@@ -117,6 +117,7 @@ const AdminProductList = () => {
                       {product.description}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
+                      {/* CORRECTED: Pass product._id (the database ID) to handleEdit */}
                       <button
                         onClick={() => handleEdit(product._id)}
                         className="flex-shrink-0 inline-flex items-center space-x-2 text-gray-600 hover:text-brand-orange dark:text-gray-300 dark:hover:text-brand-orange-light transition-colors"

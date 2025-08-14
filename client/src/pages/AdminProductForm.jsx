@@ -1,34 +1,50 @@
 // client/src/pages/AdminProductForm.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 import { motion } from "framer-motion";
 import { FaSave, FaArrowLeft, FaSpinner } from "react-icons/fa";
 import { toast } from "sonner";
+
+const availableCategories = [
+  { id: "abrasion", name: "High Abrasion" },
+  { id: "impact", name: "High Impact" },
+  { id: "temperature", name: "High Temperature" },
+];
 
 const AdminProductForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
+    id: "", // The URL slug
     description: "",
     hardness: "",
     temp: "",
     alloyElements: "",
     microstructure: "",
+    category: [],
+    applicationImage: "",
+    features: "",
+    applications: "",
   });
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
 
-  // Your original data fetching logic is unchanged.
   useEffect(() => {
     if (id) {
-      setLoading(true);
       const fetchProduct = async () => {
         try {
-          const { data } = await axios.get(`/api/products/${id}`);
+          setLoading(true);
+          const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+          const config = {
+            headers: { Authorization: `Bearer ${userInfo.token}` },
+          };
+          const { data } = await api.get(`/api/products/${id}`, config);
+
           setFormData({
             name: data.name || "",
+            id: data.id || "",
             description: data.description || "",
             hardness: data.hardness || "",
             temp: data.temp || "",
@@ -36,22 +52,35 @@ const AdminProductForm = () => {
               ? data.alloyElements.join(", ")
               : "",
             microstructure: data.microstructure || "",
+            category: data.category || [],
+            applicationImage: data.applicationImage || "",
+            features: data.features ? data.features.join(", ") : "",
+            applications: data.applications ? data.applications.join(", ") : "",
           });
         } catch (error) {
           toast.error("Failed to fetch product data.");
+          navigate("/admin/dashboard");
         } finally {
           setLoading(false);
         }
       };
       fetchProduct();
     }
-  }, [id]);
+  }, [id, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Your original submission logic is unchanged.
+  const handleCategoryChange = (categoryId) => {
+    setFormData((prev) => {
+      const newCategories = prev.category.includes(categoryId)
+        ? prev.category.filter((c) => c !== categoryId)
+        : [...prev.category, categoryId];
+      return { ...prev, category: newCategories };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -71,13 +100,21 @@ const AdminProductForm = () => {
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean),
+        features: formData.features
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        applications: formData.applications
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
       };
 
       if (isEditMode) {
-        await axios.put(`/api/products/${id}`, productData, config);
+        await api.put(`/api/products/${id}`, productData, config);
         toast.success("Product updated successfully!");
       } else {
-        await axios.post("/api/products", productData, config);
+        await api.post("/api/products", productData, config);
         toast.success("Product created successfully!");
       }
       navigate("/admin/dashboard");
@@ -98,7 +135,6 @@ const AdminProductForm = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
         className="p-8 max-w-4xl mx-auto bg-white dark:bg-brand-dark-light rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
       >
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -138,6 +174,22 @@ const AdminProductForm = () => {
                 />
               </div>
               <div>
+                <label htmlFor="id" className={labelStyles}>
+                  URL Slug (e.g., cbk-eco)
+                </label>
+                <input
+                  id="id"
+                  type="text"
+                  name="id"
+                  value={formData.id}
+                  onChange={handleChange}
+                  required
+                  className={inputStyles}
+                />
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
                 <label htmlFor="hardness" className={labelStyles}>
                   Hardness (e.g., 55-58 Rc)
                 </label>
@@ -149,6 +201,20 @@ const AdminProductForm = () => {
                   onChange={handleChange}
                   required
                   className={inputStyles}
+                />
+              </div>
+              <div>
+                <label htmlFor="temp" className={labelStyles}>
+                  Temp Resistance (Optional)
+                </label>
+                <input
+                  id="temp"
+                  type="text"
+                  name="temp"
+                  value={formData.temp}
+                  onChange={handleChange}
+                  className={inputStyles}
+                  placeholder="e.g., 100°C"
                 />
               </div>
             </div>
@@ -166,48 +232,67 @@ const AdminProductForm = () => {
                 className={inputStyles}
               />
             </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="temp" className={labelStyles}>
-                  Temp Resistance (Optional)
-                </label>
-                <input
-                  id="temp"
-                  type="text"
-                  name="temp"
-                  value={formData.temp}
-                  onChange={handleChange}
-                  className={inputStyles}
-                  placeholder="e.g., 100°C"
-                />
-              </div>
-              <div>
-                <label htmlFor="alloyElements" className={labelStyles}>
-                  Alloy Elements (comma-separated)
-                </label>
-                <input
-                  id="alloyElements"
-                  type="text"
-                  name="alloyElements"
-                  value={formData.alloyElements}
-                  onChange={handleChange}
-                  className={inputStyles}
-                  placeholder="e.g., Chromium, Niobium..."
-                />
+            <div>
+              <label className={labelStyles}>Categories</label>
+              <div className="mt-2 flex flex-wrap gap-4 p-4 bg-gray-100 dark:bg-brand-dark rounded-lg">
+                {availableCategories.map((cat) => (
+                  <label
+                    key={cat.id}
+                    className="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.category.includes(cat.id)}
+                      onChange={() => handleCategoryChange(cat.id)}
+                      className="h-4 w-4 rounded border-gray-300 text-brand-orange focus:ring-brand-orange"
+                    />
+                    <span className="text-gray-700 dark:text-gray-200">
+                      {cat.name}
+                    </span>
+                  </label>
+                ))}
               </div>
             </div>
             <div>
-              <label htmlFor="microstructure" className={labelStyles}>
-                Microstructure (Optional)
+              <label htmlFor="applicationImage" className={labelStyles}>
+                Application Image URL (Optional)
+              </label>
+              <input
+                id="applicationImage"
+                type="text"
+                name="applicationImage"
+                value={formData.applicationImage}
+                onChange={handleChange}
+                className={inputStyles}
+                placeholder="e.g., /images/applications/conveyor.jpg"
+              />
+            </div>
+            <div>
+              <label htmlFor="features" className={labelStyles}>
+                Key Features (comma-separated)
               </label>
               <textarea
-                id="microstructure"
-                name="microstructure"
-                value={formData.microstructure}
+                id="features"
+                name="features"
+                value={formData.features}
                 onChange={handleChange}
-                rows="4"
+                rows="3"
                 className={inputStyles}
-                placeholder="Describe the microstructure analysis..."
+                placeholder="e.g., Cost-Effective, Good Formability..."
+              />
+            </div>
+            <div>
+              <label htmlFor="applications" className={labelStyles}>
+                Common Applications (comma-separated)
+              </label>
+              <textarea
+                id="applications"
+                name="applications"
+                value={formData.applications}
+                onChange={handleChange}
+                rows="3"
+                className={inputStyles}
+                placeholder="e.g., Hoppers, Chutes, Liners..."
               />
             </div>
             <div className="pt-4">
@@ -216,7 +301,7 @@ const AdminProductForm = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 disabled={loading}
-                className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-brand-orange text-white font-bold text-lg rounded-md shadow-lg hover:bg-brand-orange-dark transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-brand-orange text-white font-bold text-lg rounded-md shadow-lg hover:bg-brand-orange-dark transition-colors disabled:bg-gray-400"
               >
                 {loading ? (
                   <FaSpinner className="animate-spin" />
