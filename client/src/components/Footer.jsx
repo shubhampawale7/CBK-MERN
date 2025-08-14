@@ -110,12 +110,12 @@ const Footer = () => {
             <ul className="space-y-3 text-sm">
               <ContactLink
                 icon={FaPhone}
-                href="tel:9028040306"
-                text="9028040306"
+                href="tel:+919028040306"
+                text="+919028040306"
               />
               <ContactLink
                 icon={FaWhatsapp}
-                href="https://wa.me/8530302402"
+                href="https://wa.me/+918530302402"
                 text="8530302402"
               />
               <ContactLink
