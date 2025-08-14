@@ -48,7 +48,7 @@ const Products = () => {
         <div className="relative bg-gray-900 pt-32 pb-20 text-center">
           <div className="absolute inset-0">
             <img
-              src="/images/products-banner.jpg"
+              src="/images/cbk-hero-background.jpg"
               alt="Collection of wear plates"
               className="w-full h-full object-cover opacity-20"
             />
