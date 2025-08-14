@@ -14,12 +14,12 @@ const router = express.Router();
 
 // --- Public Routes ---
 router.get("/", getProducts);
-// This route is for public product detail pages.
 router.get("/slug/:slug", getProductBySlug);
 
+// Product detail pages are now public
+router.get("/:id", getProductById);
+
 // --- Protected (Admin) Routes ---
-// This route is specifically for the admin panel to fetch a product for editing.
-router.get("/:id", protect, getProductById);
 router.post("/", protect, createProduct);
 router.put("/:id", protect, updateProduct);
 router.delete("/:id", protect, deleteProduct);
