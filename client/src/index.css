@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  /* This applies your theme's background color to the entire page,
+     preventing any white flashes during transitions. */
+  @apply bg-brand-light dark:bg-brand-dark transition-colors duration-300;
+}
