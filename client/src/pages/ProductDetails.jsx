@@ -27,6 +27,9 @@ const imageMap = {
   "CBK 1 Plus": cbk1PlusImage,
 };
 
+// ✅ Helper to check if a string is a valid MongoDB ObjectId
+const isValidObjectId = (id) => /^[0-9a-fA-F]{24}$/.test(id);
+
 const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -37,7 +40,14 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const { data } = await api.get(`/api/products/${id}`);
+
+        // Decide endpoint based on param type
+        const endpoint = isValidObjectId(id)
+          ? `/api/products/${id}`
+          : `/api/products/slug/${id}`;
+
+        const { data } = await api.get(endpoint);
+
         setProduct(data);
         setMainImage(imageMap[data.name] || data.applicationImage || null);
       } catch (error) {
@@ -48,8 +58,6 @@ const ProductDetails = () => {
       }
     };
 
-    // CORRECTED: This check prevents the API call from running if the `id` is not yet available.
-    // This is the definitive fix for the "undefined" error.
     if (id) {
       fetchProduct();
     }
