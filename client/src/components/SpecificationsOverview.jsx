@@ -1,16 +1,15 @@
 // client/src/components/SpecificationsOverview.jsx
-import { useState } from "react";
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import {
   FaRulerCombined,
   FaLayerGroup,
   FaCogs,
   FaTools,
-  FaCheckCircle,
-  FaProjectDiagram,
+  FaHandPointer,
 } from "react-icons/fa";
 
-// Expanded and reorganized data from the brochure
+// --- Data (Unchanged) ---
 const specFeatures = [
   {
     id: "size",
@@ -34,135 +33,68 @@ const specFeatures = [
     id: "fabrication",
     icon: FaTools,
     title: "Custom Fabrication",
-    details:
-      "Plates can be supplied with custom radii, sine wave deposits, and double-sided overlays.",
+    details: "Custom radii, sine wave deposits, and double-sided overlays.",
   },
 ];
 
 const SpecificationsOverview = () => {
-  const [hoveredSpec, setHoveredSpec] = useState(null);
+  const constraintsRef = useRef(null);
 
   return (
-    <section className="py-20 bg-white dark:bg-brand-dark-light">
+    <section className="py-24 bg-white dark:bg-brand-dark-light overflow-hidden">
       <div className="max-w-7xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
+          viewport={{ once: true, amount: 0.5 }}
+          className="text-center mb-12"
         >
-          <h2 className="text-4xl font-bold text-brand-orange dark:text-brand-orange-light">
+          <h2 className="text-4xl font-serif font-bold text-brand-orange dark:text-brand-orange-light">
             Engineered to Exacting Standards
           </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="mt-4 font-serif text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             We provide custom-fabricated wear plates with precise dimensions and
             features to meet the unique demands of your industrial applications.
           </p>
+          <div className="mt-6 text-brand-orange animate-pulse flex items-center justify-center gap-2">
+            <FaHandPointer size={20} />
+            <span className="font-semibold">Drag to explore</span>
+          </div>
         </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-8 items-center">
-          {/* Left Column: Features */}
-          <div className="space-y-4">
-            {specFeatures.slice(0, 2).map((spec, index) => (
-              <SpecCard
-                key={spec.id}
-                spec={spec}
-                setHoveredSpec={setHoveredSpec}
-                delay={index * 0.1}
-              />
-            ))}
-          </div>
-
-          {/* Center Column: SVG Diagram */}
+        <motion.div className="w-full cursor-grab" ref={constraintsRef}>
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="w-full h-80"
+            className="flex gap-8 w-max"
+            drag="x"
+            dragConstraints={constraintsRef}
           >
-            <svg
-              viewBox="0 0 100 80"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-full h-full"
-            >
-              {/* Weld Deposit Layer */}
-              <rect
-                y="20"
-                width="100"
-                height="20"
-                className={`fill-brand-orange/30 stroke-brand-orange transition-all duration-300 ${
-                  hoveredSpec === "deposit" ? "stroke-2" : "stroke-0"
-                }`}
-              />
-              <text
-                x="50"
-                y="35"
-                textAnchor="middle"
-                className="text-sm font-bold fill-brand-orange-dark dark:fill-brand-orange-light"
-              >
-                Weld Deposit
-              </text>
-
-              {/* Base Plate Layer */}
-              <rect
-                y="40"
-                width="100"
-                height="20"
-                className={`fill-gray-300 dark:fill-gray-600 stroke-gray-700 dark:stroke-gray-300 transition-all duration-300 ${
-                  hoveredSpec === "base" ? "stroke-2" : "stroke-0"
-                }`}
-              />
-              <text
-                x="50"
-                y="55"
-                textAnchor="middle"
-                className="text-sm font-bold fill-gray-800 dark:fill-gray-200"
-              >
-                Base Plate
-              </text>
-            </svg>
-          </motion.div>
-
-          {/* Right Column: Features */}
-          <div className="space-y-4">
-            {specFeatures.slice(2, 4).map((spec, index) => (
-              <SpecCard
-                key={spec.id}
-                spec={spec}
-                setHoveredSpec={setHoveredSpec}
-                delay={index * 0.1}
-              />
+            {specFeatures.map((spec) => (
+              <SpecCard key={spec.id} spec={spec} />
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );
 };
 
-// Helper component for the feature cards to keep the main component clean
-const SpecCard = ({ spec, setHoveredSpec, delay }) => (
+const SpecCard = ({ spec }) => (
   <motion.div
     initial={{ opacity: 0, y: 50 }}
     whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ delay }}
-    onMouseEnter={() => setHoveredSpec(spec.id)}
-    onMouseLeave={() => setHoveredSpec(null)}
-    className="bg-brand-light dark:bg-brand-dark p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+    viewport={{ once: true, amount: 0.5 }}
+    whileHover={{ y: -8, transition: { type: "spring", stiffness: 300 } }}
+    className="w-[320px] font-serif h-[220px] bg-brand-light dark:bg-brand-dark p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 flex flex-col justify-between"
   >
-    <div className="flex items-start space-x-4">
-      <div className="flex-shrink-0">
+    <div className="flex justify-between items-start">
+      <h3 className="text-2xl font-bold text-gray-800 dark:text-white w-2/3">
+        {spec.title}
+      </h3>
+      <div className="p-3 bg-brand-orange/10 rounded-lg">
         <spec.icon className="text-3xl text-brand-orange" />
       </div>
-      <div>
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
-          {spec.title}
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">{spec.details}</p>
-      </div>
     </div>
+    <p className="text-gray-600 dark:text-gray-400">{spec.details}</p>
   </motion.div>
 );
 

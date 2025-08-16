@@ -16,79 +16,130 @@ import CompanyTimeline from "../components/CompanyTimeline";
 import MeetTheTeam from "../components/MeetTheTeam";
 
 const About = () => {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100 },
+    },
+  };
+
   return (
     <>
       <Helmet>
         <title>About Us - CBK Engineers</title>
         <meta
           name="description"
-          content="Learn about CBK Engineers, our history, our team, our advanced Powder Fusion Welding Process, and our commitment to quality in wear plate manufacturing."
+          content="Learn about CBK Engineers, our history, our team, our advanced Powder Fusion Welding Process, and our commitment to quality."
         />
       </Helmet>
-      <div className="bg-white dark:bg-brand-dark text-brand-dark-light dark:text-brand-light font-sans">
-        {/* Page Header with Banner Image */}
-        <div className="relative bg-gray-800 pt-32 pb-20">
-          <div className="absolute inset-0">
+      <div className="bg-white dark:bg-brand-dark text-brand-dark-light dark:text-gray-300 font-serif">
+        {/* SECTION 1: HERO */}
+        <section className="relative h-[60vh] flex items-center justify-center text-center px-4 overflow-hidden">
+          <div className="absolute inset-0 bg-brand-dark">
             <img
               src="/images/factory-exterior.jpg"
               alt="CBK Engineers Facility"
-              className="w-full h-full object-cover opacity-30"
+              className="w-full h-full object-cover opacity-70"
             />
           </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/70 to-transparent z-10"></div>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative max-w-7xl mx-auto px-4 text-center"
+            transition={{ duration: 0.7 }}
+            className="relative z-20"
           >
-            <h1 className="text-5xl font-bold text-white">
-              About CBK ENGINEERS
+            <h1 className="text-5xl font-serif md:text-7xl font-extrabold text-white tracking-tighter">
+              Engineering{" "}
+              <span className="text-brand-orange-light">Excellence</span>
             </h1>
-            <p className="mt-4 text-xl max-w-3xl mx-auto text-gray-200">
+            <p className="mt-4 font-mono text-xl max-w-3xl mx-auto text-gray-200">
               A leading Wear Plates Manufacturer dedicated to quality and
               precision engineering.
             </p>
           </motion.div>
-        </div>
+        </section>
 
-        {/* Manufacturing Process Section (Existing) */}
-        <div className="py-20 max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
+        {/* SECTION 2: MANUFACTURING PROCESS */}
+        <section className="py-24  bg-brand-light dark:bg-brand-dark-light">
+          <div className="max-w-7xl font-serif mx-auto px-4 grid md:grid-cols-2 gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
             >
-              <h2 className="text-3xl font-semibold text-gray-800 dark:text-white flex items-center space-x-3">
-                <FaFlask className="text-brand-orange text-4xl" />
-                <span>Our Advanced Manufacturing Process</span>
+              <h2 className="text-4xl font-bold text-gray-800 dark:text-white flex items-center gap-4">
+                <FaFlask className="text-brand-orange" />
+                <span>Our Advanced Process</span>
               </h2>
-              <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                Our core expertise lies in the **Powder Fusion Welding
-                Process**. This advanced method allows us to create wear plates
-                with superior performance characteristics:
+              <p className="mt-6 text-lg text-gray-600 dark:text-gray-300">
+                Our core expertise lies in the{" "}
+                <strong className="text-brand-orange">
+                  Powder Fusion Welding Process
+                </strong>
+                . This advanced method allows us to create wear plates with
+                superior performance characteristics:
               </p>
-              <ul className="mt-6 space-y-4 text-gray-700 dark:text-gray-300">
-                <li className="flex items-start">
-                  <FaCheckCircle className="text-brand-orange-light mr-3 mt-1 flex-shrink-0" />
-                  Minimum dilution with the base metal.
-                </li>
-                <li className="flex items-start">
-                  <FaCheckCircle className="text-brand-orange-light mr-3 mt-1 flex-shrink-0" />
-                  Uniform distribution of carbides.
-                </li>
-                <li className="flex items-start">
-                  <FaCheckCircle className="text-brand-orange-light mr-3 mt-1 flex-shrink-0" />
-                  Uniform hardness throughout the thickness.
-                </li>
-              </ul>
+              <motion.ul
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                className="mt-8 space-y-4"
+              >
+                <motion.li
+                  variants={itemVariants}
+                  className="flex items-start gap-3"
+                >
+                  <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
+                  <span>
+                    <strong className="text-brand-orange">
+                      Minimum dilution
+                    </strong>{" "}
+                    with the base metal, ensuring maximum hardness.
+                  </span>
+                </motion.li>
+                <motion.li
+                  variants={itemVariants}
+                  className="flex items-start gap-3"
+                >
+                  <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
+                  <span>
+                    <strong className="text-brand-orange">
+                      Uniform distribution
+                    </strong>{" "}
+                    of carbides for consistent wear resistance.
+                  </span>
+                </motion.li>
+                <motion.li
+                  variants={itemVariants}
+                  className="flex items-start gap-3"
+                >
+                  <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
+                  <span>
+                    <strong className="text-brand-orange">
+                      Consistent hardness
+                    </strong>{" "}
+                    throughout the overlay thickness for longer life.
+                  </span>
+                </motion.li>
+              </motion.ul>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="flex justify-center"
+              transition={{ duration: 0.7 }}
             >
-              <div className="w-full h-80 bg-gray-200 dark:bg-brand-dark-light rounded-lg overflow-hidden shadow-lg">
+              <div className="rounded-2xl overflow-hidden shadow-2xl">
                 <img
                   src="/images/cbk-workshop.png"
                   alt="CBK Engineers Manufacturing Facility"
@@ -97,64 +148,45 @@ const About = () => {
               </div>
             </motion.div>
           </div>
-        </div>
+        </section>
 
-        {/* NEW: Technical Specifications Section */}
+        {/* Imported Components Sections */}
         <TechnicalSpecifications />
-
-        {/* NEW: Company Timeline Section */}
         <CompanyTimeline />
-
-        {/* NEW: Meet The Team Section */}
         <MeetTheTeam />
 
-        {/* Get In Touch Section (Existing) */}
-        <section className="bg-brand-light dark:bg-brand-dark-light py-20">
-          <div className="max-w-7xl mx-auto px-4">
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
+        {/* SECTION 3: "GET IN TOUCH" CTA */}
+        <section className="bg-white dark:bg-brand-dark py-24">
+          <div className="max-w-7xl font-serif mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-3xl font-semibold text-center text-gray-800 dark:text-white flex items-center justify-center space-x-3"
+              viewport={{ once: true, amount: 0.5 }}
+              className="bg-brand-dark-light dark:bg-brand-dark rounded-2xl p-12 text-center grid lg:grid-cols-3 gap-8 items-center"
             >
-              <FaMapMarkerAlt className="text-brand-orange text-4xl" />
-              <span>Get In Touch</span>
-            </motion.h2>
-            <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
-              <InfoCard
-                title="Office Address"
-                text="562, Sadashiv Peth, Chitrashala Building, Flat # 218, Pune 411 030. Maharashtra, INDIA."
-              />
-              <InfoCard
-                title="Plant Address"
-                text="Jaimalhar Industrial Estate, Plot No. 13, Gat No. 1548, Sonawane Vasti Road, Chikhali, Pune 411062. Maharashtra, INDIA."
-              />
-              <div className="bg-white dark:bg-brand-dark p-6 rounded-lg shadow-md space-y-4">
-                <h3 className="text-xl font-bold text-brand-orange dark:text-brand-orange-light">
-                  Contact Details
-                </h3>
-                <ContactLink
+              <div className="lg:col-span-2 text-left">
+                <h2 className="text-4xl font-bold text-white">
+                  Partner with the Experts
+                </h2>
+                <p className="mt-4 text-lg text-gray-300 max-w-2xl">
+                  Ready to enhance the lifespan and performance of your critical
+                  equipment? Contact our team today for a personalized
+                  consultation.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+                <ContactButton
                   icon={FaPhone}
                   href="tel:9028040306"
-                  text="9028040306"
+                  text="Call Us"
                 />
-                <ContactLink
+                <ContactButton
                   icon={FaWhatsapp}
                   href="https://wa.me/8530302402"
-                  text="8530302402"
-                />
-                <ContactLink
-                  icon={FaEnvelope}
-                  href="mailto:chinmay562@yahoo.com"
-                  text="chinmay562@yahoo.com"
-                />
-                <ContactLink
-                  icon={FaEnvelope}
-                  href="mailto:cbk_engineers@yahoo.com"
-                  text="cbk_engineers@yahoo.com"
+                  text="WhatsApp"
                 />
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
       </div>
@@ -162,34 +194,17 @@ const About = () => {
   );
 };
 
-// Helper components for cleaner JSX (These remain the same)
-const InfoCard = ({ title, text }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    className="bg-white dark:bg-brand-dark p-6 rounded-lg shadow-md"
+const ContactButton = ({ icon: Icon, href, text }) => (
+  <motion.a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    whileHover={{ scale: 1.05, y: -2 }}
+    className="flex items-center justify-center gap-3 w-full p-4 bg-brand-orange text-white font-bold rounded-xl shadow-lg hover:bg-brand-orange-dark transition-colors"
   >
-    {" "}
-    <h3 className="text-xl font-bold text-brand-orange dark:text-brand-orange-light">
-      {title}
-    </h3>{" "}
-    <p className="mt-2 text-gray-600 dark:text-gray-300">{text}</p>{" "}
-  </motion.div>
-);
-const ContactLink = ({ icon: Icon, href, text }) => (
-  <div className="flex items-center space-x-3">
-    {" "}
-    <Icon className="text-gray-500 dark:text-gray-400" />{" "}
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-gray-600 dark:text-gray-300 hover:text-brand-orange dark:hover:text-brand-orange-light"
-    >
-      {text}
-    </a>{" "}
-  </div>
+    <Icon size={20} />
+    <span>{text}</span>
+  </motion.a>
 );
 
 export default About;

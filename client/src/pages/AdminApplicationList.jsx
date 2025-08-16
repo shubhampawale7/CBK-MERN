@@ -1,10 +1,10 @@
 // client/src/pages/AdminApplicationList.jsx
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { FaEdit, FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
-import api from "../api"; // UPDATED: Import the central API file
+import { FaEdit, FaTrash, FaPlus, FaSpinner, FaIndustry } from "react-icons/fa";
+import api from "../api";
 
 const AdminApplicationList = () => {
   const [applications, setApplications] = useState([]);
@@ -13,7 +13,6 @@ const AdminApplicationList = () => {
 
   const fetchApplications = async () => {
     try {
-      // UPDATED: The call now uses the central 'api' instance.
       const { data } = await api.get("/api/applications");
       setApplications(data);
     } catch (error) {
@@ -39,7 +38,6 @@ const AdminApplicationList = () => {
         const config = {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         };
-        // UPDATED: The call now uses the central 'api' instance.
         await api.delete(`/api/applications/${id}`, config);
         toast.success("Application deleted successfully!");
         fetchApplications();
@@ -53,8 +51,23 @@ const AdminApplicationList = () => {
   const handleEdit = (id) => navigate(`/admin/applications/${id}/edit`);
   const handleCreate = () => navigate("/admin/applications/create");
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.98 },
+    visible: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, y: -20, scale: 0.98 },
+  };
+
   return (
-    <div className="p-4 sm:p-6 lg:p-8 font-sans">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="p-4 sm:p-0"
+    >
       <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
         <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
           Manage Applications
@@ -63,79 +76,96 @@ const AdminApplicationList = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleCreate}
-          className="flex items-center space-x-2 px-5 py-2 bg-brand-orange text-white font-semibold rounded-lg shadow-md hover:bg-brand-orange-dark transition-colors"
+          className="flex items-center gap-2 px-5 py-2 bg-brand-orange text-white font-semibold rounded-lg shadow-md hover:bg-brand-orange-dark transition-colors"
         >
           <FaPlus />
           <span>Create New</span>
         </motion.button>
       </div>
 
-      <div className="bg-white dark:bg-brand-dark-light rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <FaSpinner className="animate-spin text-4xl text-brand-orange" />
-          </div>
-        ) : applications.length === 0 ? (
-          <div className="text-center py-16">
-            <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200">
-              No Applications Found
-            </h3>
-            <p className="mt-2 text-gray-500">
-              Click "Create New" to add the first application.
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-brand-dark">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    Industry
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    Key Applications
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-brand-dark-light divide-y divide-gray-200 dark:divide-gray-700">
-                {applications.map((app) => (
-                  <tr
-                    key={app._id}
-                    className="hover:bg-gray-50 dark:hover:bg-brand-dark transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {app.industry}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-sm truncate">
-                      {app.applicationsList.join(", ")}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
-                      <button
-                        onClick={() => handleEdit(app._id)}
-                        className="flex-shrink-0 inline-flex items-center space-x-2 text-gray-600 hover:text-brand-orange dark:text-gray-300 dark:hover:text-brand-orange-light transition-colors"
-                      >
-                        <FaEdit />
-                        <span>Edit</span>
-                      </button>
-                      <button
-                        onClick={() => handleDelete(app._id)}
-                        className="flex-shrink-0 inline-flex items-center space-x-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500 transition-colors"
-                      >
-                        <FaTrash />
-                        <span>Delete</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <FaSpinner className="animate-spin text-4xl text-brand-orange" />
+        </div>
+      ) : applications.length === 0 ? (
+        <div className="text-center py-16 bg-white dark:bg-brand-dark-light rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+          <FaIndustry className="mx-auto text-5xl text-gray-400 dark:text-gray-500 mb-4" />
+          <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200">
+            No Applications Found
+          </h3>
+          <p className="mt-2 text-gray-500">
+            Click "Create New" to add the first application.
+          </p>
+        </div>
+      ) : (
+        <motion.div
+          layout
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          <AnimatePresence>
+            {applications.map((app) => (
+              <motion.div
+                key={app._id}
+                layout
+                variants={itemVariants}
+                exit="exit"
+                className="relative bg-white dark:bg-brand-dark-light rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden group"
+              >
+                <div className="h-40 bg-gray-100 dark:bg-brand-dark overflow-hidden">
+                  <img
+                    src={app.image || "/images/industries/default-industry.jpg"}
+                    alt={app.industry}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+                <div className="p-5 flex-grow flex flex-col">
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                    {app.industry}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 flex-grow">
+                    {app.applicationsList.slice(0, 3).join(", ") +
+                      (app.applicationsList.length > 3 ? "..." : "")}
+                  </p>
+                  <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                    <ActionButton
+                      onClick={() => handleEdit(app._id)}
+                      icon={FaEdit}
+                      text="Edit"
+                      color="blue"
+                    />
+                    <ActionButton
+                      onClick={() => handleDelete(app._id)}
+                      icon={FaTrash}
+                      text="Delete"
+                      color="red"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
+
+const ActionButton = ({ onClick, icon: Icon, text, color }) => {
+  const colorClasses = {
+    blue: "text-blue-600 dark:text-blue-400 hover:bg-blue-500/10",
+    red: "text-red-600 dark:text-red-400 hover:bg-red-500/10",
+  };
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors duration-200 ${colorClasses[color]}`}
+    >
+      <Icon />
+      <span>{text}</span>
+    </button>
   );
 };
 

@@ -36,7 +36,7 @@ const timelineEvents = [
 
 const CompanyTimeline = () => {
   return (
-    <section className="py-20 bg-brand-light dark:bg-brand-dark-light overflow-hidden">
+    <section className="py-20 font-serif bg-brand-light dark:bg-brand-dark-light overflow-hidden">
       <div className="max-w-7xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
